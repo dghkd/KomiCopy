@@ -41,7 +41,7 @@ namespace KomiCopy.Component
             _vm.FilePath = dropFiles[0];
             try
             {
-                _vm.ImageObject = new BitmapImage(new Uri(_vm.FilePath));
+                _vm.ImageObject = LoadImage(_vm.FilePath);
             }
             catch (Exception ex)
             {
@@ -49,6 +49,33 @@ namespace KomiCopy.Component
                 String fileExt = System.IO.Path.GetExtension(_vm.FilePath);
                 _vm.FileDesc = String.Format("{0} file", fileExt);
             }
+        }
+
+        private BitmapImage LoadImage(String path)
+        {
+            if (!System.IO.File.Exists(path))
+            {
+                return null;
+            }
+
+            byte[] imgFileByte = System.IO.File.ReadAllBytes(path);
+            if (imgFileByte == null
+                || imgFileByte.Length == 0)
+                return null;
+
+            BitmapImage image = new BitmapImage();
+            using (var mem = new System.IO.MemoryStream(imgFileByte))
+            {
+                mem.Position = 0;
+                image.BeginInit();
+                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = null;
+                image.StreamSource = mem;
+                image.EndInit();
+            }
+            image.Freeze();
+            return image;
         }
     }
 }

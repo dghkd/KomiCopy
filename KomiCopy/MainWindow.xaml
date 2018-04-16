@@ -1,0 +1,93 @@
+﻿<Window x:Class="KomiCopy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:KomiCopy.Component"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="Width"
+        Title="KomiCopy"
+        Height="350" Width="430" MinWidth="230">
+    <Grid>
+        <TabControl>
+            <TabItem Header="合併">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="23"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid>
+                        <TextBlock Text="數量:"
+                                   VerticalAlignment="Center"></TextBlock>
+                        <ComboBox x:Name="CMB_FileCount"
+                                  Margin="30,0,0,0" Width="40"
+                                  HorizontalAlignment="Left" VerticalAlignment="Center"
+                                  SelectedIndex="0"
+                                  SelectionChanged="On_CMB_FileCount_SelectionChanged">
+                            <ComboBoxItem>2</ComboBoxItem>
+                            <ComboBoxItem>3</ComboBoxItem>
+                            <ComboBoxItem>4</ComboBoxItem>
+                            <ComboBoxItem>5</ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        
+                        <ListBox x:Name="LB_Files"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                 ScrollViewer.CanContentScroll="False">
+                            <ListBox.Resources>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Border VerticalAlignment="Stretch">
+                                                    <local:FileDropView Width="200" Height="210"></local:FileDropView>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.Resources>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" ></StackPanel>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <Button x:Name="BTN_Merge"
+                                Content="合併"
+                                Width="100" Height="32" Margin="0,5,0,0"
+                                HorizontalAlignment="Center" VerticalAlignment="Top"
+                                Click="On_BTN_Merge_Click"></Button>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="解析">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="32"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <local:FileDropView x:Name="UC_ResolveFile" Width="200"></local:FileDropView>
+                    </Grid>
+                    
+                    <Grid Grid.Row="1">
+                        <Button x:Name="BTN_Resolve"
+                                Content="分解"
+                                Width="100" Height="32"
+                                HorizontalAlignment="Center" VerticalAlignment="Top"
+                                Click="On_BTN_Resolve_Click"></Button>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            
+        </TabControl>
+    </Grid>
+</Window>

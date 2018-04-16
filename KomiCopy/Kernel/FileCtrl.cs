@@ -65,7 +65,7 @@ namespace KomiCopy.Kernel
 
                 //插入附加檔檔名
                 String fileName = Path.GetFileName(filePath);
-                byte[] fileNameBytes = Encoding.ASCII.GetBytes(fileName);
+                byte[] fileNameBytes = Encoding.Unicode.GetBytes(fileName);
                 foreach (byte b in fileNameBytes)
                 {
                     outputFile.WriteByte(b);
@@ -125,7 +125,7 @@ namespace KomiCopy.Kernel
 
                 //取得原檔名
                 byte[] fileNameBytes = GetBytes(inputFileBytes, startIdx + SHIKIBETSU_BYTES.Length, endIdx);
-                String fileName = Encoding.ASCII.GetString(fileNameBytes);
+                String fileName = Encoding.Unicode.GetString(fileNameBytes);
 
                 //搜尋原檔案結尾
                 startIdx = endIdx;

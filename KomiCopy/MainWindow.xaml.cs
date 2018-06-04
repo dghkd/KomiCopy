@@ -17,6 +17,7 @@ using System.Collections.ObjectModel;
 
 using KomiCopy.ViewModel;
 using KomiCopy.Kernel;
+using KomiCopy.Crypt;
 
 namespace KomiCopy
 {
@@ -27,13 +28,17 @@ namespace KomiCopy
     {
         private ObservableCollection<CopyFileVM> _fileColle = new ObservableCollection<CopyFileVM>();
         private CopyFileVM _resolveFile = new CopyFileVM();
+        CryptCtrl _ctrl = new CryptCtrl();
 
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            FileCtrl.Cryptor.LoadLocalHostKeyPair();
+
             LB_Files.ItemsSource = _fileColle;
             UC_ResolveFile.DataContext = _resolveFile;
+            TXTBOX_LocalPubKey.Text = FileCtrl.Cryptor.GetPublicKeyText();
         }
 
         private void On_CMB_FileCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -61,7 +66,7 @@ namespace KomiCopy
                 fileList.Add(vm.FilePath);
             }
 
-            bool bMerged = FileCtrl.MergeFiles(fileList);
+            bool bMerged = FileCtrl.MergeFiles(fileList, Convert.ToBoolean(CB_IsEncrypt.IsChecked), TXTBOX_AnotherPubKey.Text);
 
             if (bMerged)
             {
@@ -77,7 +82,7 @@ namespace KomiCopy
 
         private void On_BTN_Resolve_Click(object sender, RoutedEventArgs e)
         {
-            bool bResolved = FileCtrl.ResolveFile(_resolveFile.FilePath);
+            bool bResolved = FileCtrl.ResolveFile(_resolveFile.FilePath, Convert.ToBoolean(CB_IsDecrypt.IsChecked));
 
             if (bResolved)
             {
@@ -89,5 +94,35 @@ namespace KomiCopy
             }
         }
 
+        private void On_BTN_CreateCryptKey_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult ret = MessageBox.Show("你確定要重新建立新的密文嗎?", "重建密文", MessageBoxButton.YesNo);
+            if (ret == MessageBoxResult.Yes)
+            {
+                FileCtrl.Cryptor.CreateLocalHostKeyPair();
+                TXTBOX_LocalPubKey.Text = FileCtrl.Cryptor.GetPublicKeyText();
+            }
+        }
+
+        private void On_BTN_CopyKeyText_Click(object sender, RoutedEventArgs e)
+        {
+            bool bCopied = false;
+            for (int i = 0; i < 5 && !bCopied; i++)
+            {
+                try
+                {
+                    String text = TXTBOX_LocalPubKey.Text;
+                    Clipboard.SetDataObject(text);
+                    TXTBOX_LocalPubKey.Focus();
+                    TXTBOX_LocalPubKey.SelectAll();
+                    bCopied = true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(String.Format("[On_BTN_CopyKeyText_Click] Copy to Clipboard fail:{0}", ex.Message));
+                    System.Threading.SpinWait.SpinUntil(() => false, 100);
+                }
+            }
+        }
     }
 }

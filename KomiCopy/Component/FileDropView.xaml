@@ -8,7 +8,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="32"/>
+            <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
         <Border BorderThickness="1" BorderBrush="Black"
                 Margin="1,0" Background="White"
@@ -26,6 +26,6 @@
                  Text="{Binding FilePath}"
                  Grid.Row="1"
                  Margin="1,0"
-                 VerticalAlignment="Center"></TextBox>
+                 VerticalAlignment="Bottom"></TextBox>
     </Grid>
 </UserControl>

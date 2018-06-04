@@ -5,7 +5,7 @@
         WindowStartupLocation="CenterScreen"
         SizeToContent="Width"
         Title="KomiCopy"
-        Height="350" Width="430" MinWidth="230">
+        Height="400" Width="430" MinWidth="230">
     <Grid>
         <TabControl>
             <TabItem Header="合併">
@@ -13,9 +13,10 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="23"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="50"/>
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
-                    
+
                     <Grid>
                         <TextBlock Text="數量:"
                                    VerticalAlignment="Center"></TextBlock>
@@ -32,7 +33,7 @@
                     </Grid>
 
                     <Grid Grid.Row="1">
-                        
+
                         <ListBox x:Name="LB_Files"
                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                                  ScrollViewer.CanContentScroll="False">
@@ -42,7 +43,7 @@
                                         <Setter.Value>
                                             <ControlTemplate>
                                                 <Border VerticalAlignment="Stretch">
-                                                    <local:FileDropView Width="200" Height="210"></local:FileDropView>
+                                                    <local:FileDropView Width="200" Height="{TemplateBinding ActualHeight}"></local:FileDropView>
                                                 </Border>
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -58,6 +59,47 @@
                     </Grid>
 
                     <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="28"/>
+                            <RowDefinition Height="22"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox x:Name="CB_IsEncrypt"
+                                      Content="使用專屬加密"
+                                      Margin="0,10,0,3">
+                        </CheckBox>
+
+                        <TextBlock x:Name="TXT_AnotherPubKey"
+                                   Margin="5,0,0,0"
+                                   Grid.Row="1"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value=""></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=CB_IsEncrypt}" Value="False">
+                                            <Setter Property="Text" Value=""></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Text, ElementName=TXTBOX_AnotherPubKey}" Value="">
+                                            <Setter Property="Text" Value="請輸入對方密文"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBox x:Name="TXTBOX_AnotherPubKey"
+                                 Grid.Row="1"
+                                 Background="#C8FFFFFF"
+                                 IsEnabled="{Binding IsChecked, ElementName=CB_IsEncrypt}"
+                                 TextWrapping="NoWrap"
+                                 VerticalContentAlignment="Center"
+                                 AcceptsReturn="False">
+                        </TextBox>
+
+                    </Grid>
+
+                    <Grid Grid.Row="3">
                         <Button x:Name="BTN_Merge"
                                 Content="合併"
                                 Width="100" Height="32" Margin="0,5,0,0"
@@ -66,28 +108,78 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            
+
             <TabItem Header="解析">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="28"/>
+                        <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
 
                     <Grid>
                         <local:FileDropView x:Name="UC_ResolveFile" Width="200"></local:FileDropView>
                     </Grid>
-                    
+
                     <Grid Grid.Row="1">
+                        <CheckBox x:Name="CB_IsDecrypt"
+                                  Content="使用專屬解密"
+                                  Margin="0,10,0,3">
+                        </CheckBox>
+
+                    </Grid>
+
+                    <Grid Grid.Row="2">
                         <Button x:Name="BTN_Resolve"
                                 Content="分解"
                                 Width="100" Height="32"
-                                HorizontalAlignment="Center" VerticalAlignment="Top"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Click="On_BTN_Resolve_Click"></Button>
                     </Grid>
                 </Grid>
             </TabItem>
-            
+
+            <TabItem Header="密文設定">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="BTN_CreateCryptKey"
+                                Content="重新建立密文"
+                                Width="100"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Click="On_BTN_CreateCryptKey_Click">
+                        </Button>
+                        <Button x:Name="BTN_CopyKeyText"
+                                Content="複製到剪貼簿"
+                                Width="100"
+                                Margin="10,0,0,0"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Click="On_BTN_CopyKeyText_Click">
+                        </Button>
+
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Grid.Row="1">
+                        <TextBlock Text="本機密文:"></TextBlock>
+
+                        <TextBox x:Name="TXTBOX_LocalPubKey"
+                                 Height="23"
+                                 MinWidth="400"
+                                 Margin="2,0"
+                                 IsReadOnly="True"
+                                 VerticalContentAlignment="Center"
+                                 TextWrapping="NoWrap"
+                                 AcceptsReturn="False">
+                        </TextBox>
+                    </StackPanel>
+                    
+
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

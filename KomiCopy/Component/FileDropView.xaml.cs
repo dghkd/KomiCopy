@@ -48,6 +48,7 @@ namespace KomiCopy.Component
                 Debug.WriteLine(String.Format("Set image source fail:{0}", ex.Message));
                 String fileExt = System.IO.Path.GetExtension(_vm.FilePath);
                 _vm.FileDesc = String.Format("{0} file", fileExt);
+                _vm.ImageObject = null;
             }
         }
 

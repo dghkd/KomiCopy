@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:KomiCopy.Dialog"
         mc:Ignorable="d"
         
+        FocusManager.FocusedElement="{Binding ElementName=TXTBOX_PubKeys}"
         Title="多組密文輸入器"
-        Height="400" Width="600"
+        Height="240" Width="450"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
     <Grid>

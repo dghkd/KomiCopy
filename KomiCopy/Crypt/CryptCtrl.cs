@@ -305,6 +305,43 @@ namespace KomiCopy.Crypt
 
             return true;
         }
+
+        /// <summary>
+        /// 判斷是否為合法公鑰密文
+        /// </summary>
+        /// <param name="pubKeyText">公鑰密文(Base58字串)</param>
+        public bool IsVaildPublicKeyText(String pubKeyText)
+        {
+            byte[] pubKeyBytes;
+            try
+            {
+                pubKeyBytes = Base58.Decode(pubKeyText);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(String.Format("[IsVaildPublicKeyText] Decode Base58 fail:{0}", e.Message));
+                return false;
+            }
+
+            //ECPublicKeyParameters = public key header(24byte) + another public key(key field size - 24byte,)
+            List<byte> anoPubKeyByteList = new List<byte>();
+            anoPubKeyByteList.AddRange(this.PubKeyHeaderBytes);
+            anoPubKeyByteList.AddRange(pubKeyBytes);
+            byte[] anoPubKeyInfoBytes = anoPubKeyByteList.ToArray();
+
+            //Try create public key parameter.
+            try
+            {
+                ECPublicKeyParameters anoPubKeyParam = PublicKeyFactory.CreateKey(anoPubKeyInfoBytes) as ECPublicKeyParameters;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(String.Format("[IsVaildPublicKeyText] Create Public Key fail:{0}", e.Message));
+                return false;
+            }
+
+            return true;
+        }
         #endregion
 
 

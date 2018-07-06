@@ -64,9 +64,16 @@
     <Compile Include="Crypt\ArrayHelper.cs" />
     <Compile Include="Crypt\Base58.cs" />
     <Compile Include="Crypt\CryptCtrl.cs" />
+    <Compile Include="Dialog\MultiPubKeyEditorDialog.xaml.cs">
+      <DependentUpon>MultiPubKeyEditorDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Kernel\FileCtrl.cs" />
     <Compile Include="ViewModel\CopyFileVM.cs" />
     <Page Include="Component\FileDropView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\MultiPubKeyEditorDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

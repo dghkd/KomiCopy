@@ -18,6 +18,7 @@ using System.Collections.ObjectModel;
 using KomiCopy.ViewModel;
 using KomiCopy.Kernel;
 using KomiCopy.Crypt;
+using KomiCopy.Dialog;
 
 namespace KomiCopy
 {
@@ -122,6 +123,17 @@ namespace KomiCopy
                     Debug.WriteLine(String.Format("[On_BTN_CopyKeyText_Click] Copy to Clipboard fail:{0}", ex.Message));
                     System.Threading.SpinWait.SpinUntil(() => false, 100);
                 }
+            }
+        }
+
+        private void On_BTN_OpenMultiPubKeyEditor_Click(object sender, RoutedEventArgs e)
+        {
+            MultiPubKeyEditorDialog dlg = new MultiPubKeyEditorDialog();
+            dlg.Owner = this;
+            dlg.ShowDialog();
+            if (dlg.DialogResult == true)
+            {
+                TXTBOX_AnotherPubKey.Text = dlg.PubKeysResult;
             }
         }
     }

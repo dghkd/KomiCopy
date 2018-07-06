@@ -1,0 +1,82 @@
+﻿<Window x:Class="KomiCopy.Dialog.MultiPubKeyEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KomiCopy.Dialog"
+        mc:Ignorable="d"
+        
+        Title="多組密文輸入器"
+        Height="400" Width="600"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid >
+            <TextBlock Margin="5,0"
+                       HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Run Text="密文數量:"></Run>
+                <Run x:Name="TXT_ValidCount" Text="0"></Run>
+                <Run Text="/"></Run>
+                <Run x:Name="TXT_TotalCount" Text="0"></Run>
+            </TextBlock>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              Margin="5,0">
+            
+            <TextBlock x:Name="TXT_PubKeysDesc">
+                <Run Text="請輸入對方密文"></Run>
+                <LineBreak></LineBreak>
+                <Run Text="輸入多組密文時請以換行區隔"></Run>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Hidden"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=TXTBOX_PubKeys}" Value="">
+                                <Setter Property="Visibility" Value="Visible"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            
+            <TextBox x:Name="TXTBOX_PubKeys"
+                     Background="#C8FFFFFF"
+                     AcceptsReturn="True"
+                     TextWrapping="NoWrap"
+                     TextChanged="On_TXTBOX_PubKeys_TextChanged"></TextBox>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Width" Value="100"></Setter>
+                        <Setter Property="Height" Value="32"></Setter>
+                        <Setter Property="Margin" Value="5,0"></Setter>
+                    </Style>
+                </StackPanel.Resources>
+
+                <Button x:Name="BTN_OK"
+                        Content="OK"
+                        Click="On_BTN_OK_Click">
+
+                </Button>
+
+                <Button x:Name="BTN_Cancel"
+                        Content="Cancel"
+                        Click="On_BTN_Cancel_Click">
+
+                </Button>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</Window>

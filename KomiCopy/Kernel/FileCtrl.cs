@@ -20,6 +20,14 @@ namespace KomiCopy.Kernel
         /// 識別字位元組
         /// </summary>
         private static readonly byte[] SHIKIBETSU_BYTES = Encoding.ASCII.GetBytes(SHIKIBETSU);
+        /// <summary>
+        /// 識別字字串2
+        /// </summary>
+        private static readonly String SHIKIBETSU2 = "dghkd_komicopy";
+        /// <summary>
+        /// 識別字2位元組
+        /// </summary>
+        private static readonly byte[] SHIKIBETSU2_BYTES = Encoding.ASCII.GetBytes(SHIKIBETSU2);
 
         /// <summary>
         /// 加解密處理用暫存檔
@@ -233,7 +241,7 @@ namespace KomiCopy.Kernel
         /// 加密檔案
         /// </summary>
         /// <param name="filePath">欲加密的檔案路徑</param>
-        /// <param name="anotherPubKeyText">對方密文(Base58字串)</param>
+        /// <param name="anotherPubKeyText">對方密文(Base58字串)。可以逗號,區隔多組密文</param>
         private static bool EncryptSubFile(String filePath, String anotherPubKeyText)
         {
             //隨機產生32byte(for AES256)密鑰和16byte向量值.
@@ -252,10 +260,8 @@ namespace KomiCopy.Kernel
             byte[] derivation = ArrayHelpers.SubArray(encryptFileBytes, 0, 8);
             byte[] encoding = derivation.Reverse().ToArray();
 
-            //使用對方公鑰加密AES密鑰資料，AES密鑰資料=密鑰與向量值的串接，最後16byte固定為向量值
-            byte[] anotherPubKeyBytes = Base58.Decode(anotherPubKeyText);
-            byte[] aesKeyIVBytes = ArrayHelpers.ConcatArrays(keyBytes, ivBytes);
-            byte[] encryptKeyIV = FileCtrl.Cryptor.EncryptData(aesKeyIVBytes, anotherPubKeyBytes, derivation, encoding);
+            //加密並封裝AES密鑰
+            byte[] encryptKeyIV = EncryptAesKeyIV(anotherPubKeyText, keyBytes, ivBytes, derivation, encoding);
 
             //格式化封裝加密檔案
             List<byte> finalFile = new List<byte>();
@@ -269,6 +275,34 @@ namespace KomiCopy.Kernel
             File.WriteAllBytes(filePath, finalFile.ToArray());
 
             return true;
+        }
+
+        /// <summary>
+        /// 加密封裝AES密鑰
+        /// </summary>
+        /// <param name="anotherPubKeyText">對方密文(Base58字串)。可以逗號,區隔多組密文<</param>
+        /// <param name="keyBytes">AES密鑰key資料</param>
+        /// <param name="ivBytes">AES向量值資料</param>
+        /// <param name="derivation">ECC加密參數</param>
+        /// <param name="encoding">ECC加密參數</param>
+        /// <returns>回傳格式化封裝加密後資料</returns>
+        private static byte[] EncryptAesKeyIV(String anotherPubKeyText, byte[] keyBytes, byte[] ivBytes, byte[] derivation, byte[] encoding)
+        {
+            List<byte> result = new List<byte>();
+            byte[] aesKeyIVBytes = ArrayHelpers.ConcatArrays(keyBytes, ivBytes);
+
+            String[] pubKeys = anotherPubKeyText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (String anoPubKey in pubKeys)
+            {
+                //使用對方公鑰加密AES密鑰資料，AES密鑰資料=密鑰與向量值的串接，最後16byte固定為向量值
+                byte[] anotherPubKeyBytes = Base58.Decode(anoPubKey);
+                byte[] encryptKeyIV = FileCtrl.Cryptor.EncryptData(aesKeyIVBytes, anotherPubKeyBytes, derivation, encoding);
+                //格式化封裝加密資料
+                result.AddRange(SHIKIBETSU2_BYTES);
+                result.AddRange(encryptKeyIV);
+            }
+
+            return result.ToArray();
         }
 
         /// <summary>
@@ -297,7 +331,7 @@ namespace KomiCopy.Kernel
             byte[] encoding = derivation.Reverse().ToArray();
 
             //解密封裝的AES密鑰
-            byte[] aesKeyIV = FileCtrl.Cryptor.DecrytpData(encryptKeyIVBytes, anotherPubKeyBytes, derivation, encoding);
+            byte[] aesKeyIV = DecryptAesKeyIV(encryptKeyIVBytes, anotherPubKeyBytes, derivation, encoding);
             if (aesKeyIV == null)
             {
                 return false;
@@ -317,6 +351,78 @@ namespace KomiCopy.Kernel
             //解密成功，解密的檔案為暫存檔，路徑: TEMP_SUB_FILE_NAME
             //後續分解附加檔請從此暫存檔進行分解
             return true;
+        }
+
+        /// <summary>
+        /// 解密已封裝的AES密鑰資料
+        /// </summary>
+        /// <param name="encryptKeyIVBytes">欲解密的加密資料。包含封裝多組的加密資料</param>
+        /// <param name="anotherPubKeyBytes">對方公鑰資料</param>
+        /// <param name="derivation">ECC解密參數</param>
+        /// <param name="encoding">ECC解密參數</param>
+        /// <returns>回傳解密後的AES密鑰資料，若解密失敗則回傳Null</returns>
+        private static byte[] DecryptAesKeyIV(byte[] encryptKeyIVBytes, byte[] anotherPubKeyBytes, byte[] derivation, byte[] encoding)
+        {
+            byte[] ret = null;
+
+            //拆解封裝的多組資料
+            List<byte[]> encryptDataList = ParseEncryptAesKeyIvData(encryptKeyIVBytes);
+
+            //解密各組資料
+            foreach (byte[] encryptData in encryptDataList)
+            {
+                byte[] aesKeyIV = FileCtrl.Cryptor.DecrytpData(encryptData, anotherPubKeyBytes, derivation, encoding);
+                if (aesKeyIV != null)
+                {
+                    ret = aesKeyIV;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// 擷取格式化封裝之加密AES密鑰資料
+        /// </summary>
+        /// <param name="encryptKeyIVBytes">欲解密的加密資料。包含封裝多組的加密資料</param>
+        /// <returns></returns>
+        private static List<byte[]> ParseEncryptAesKeyIvData(byte[] encryptKeyIVBytes)
+        {
+            List<byte[]> ret = new List<byte[]>();
+            int startIdx = 0;
+            int endIdx = -1;
+
+            while (endIdx != encryptKeyIVBytes.Length)
+            {
+                //搜尋識別字位元組
+                startIdx = IndexShikibetsu2(encryptKeyIVBytes, startIdx);
+                endIdx = IndexShikibetsu2(encryptKeyIVBytes, startIdx + SHIKIBETSU2_BYTES.Length);
+                endIdx = endIdx == -1 ? encryptKeyIVBytes.Length : endIdx;
+
+                if (startIdx == -1)
+                {
+                    //已搜不到識別字位元組
+
+                    if (ret.Count == 0)
+                    {
+                        //無法取出任何區段資料，可能只有一組加密資料而未進行格式化封裝(2.0版行為)
+                        //直接擷取整段資料
+                        ret.Add(encryptKeyIVBytes);
+                    }
+
+                    return ret;
+                }
+
+                //取出區段資料
+                byte[] data = GetBytes(encryptKeyIVBytes, startIdx + SHIKIBETSU2_BYTES.Length, endIdx);
+                ret.Add(data);
+
+                //移動下一次搜尋起始位置
+                startIdx = endIdx;
+            }
+
+            return ret;
         }
 
         /// <summary>
@@ -378,6 +484,27 @@ namespace KomiCopy.Kernel
                     }
                 }
             }
+            return matchIdx;
+        }
+
+        /// <summary>
+        /// 搜尋識別字2的位元組起始位置
+        /// </summary>
+        /// <param name="inputFileBytes">檔案資料陣列</param>
+        /// <param name="offset">起始搜尋位置</param>
+        /// <returns>識別字2的位元組在檔案資料陣列的起始位置，若未搜尋到則回傳值為-1</returns>
+        private static int IndexShikibetsu2(byte[] inputFileBytes, int offset)
+        {
+            int matchIdx = -1;
+            for (int i = offset; i < inputFileBytes.Length - FileCtrl.SHIKIBETSU2_BYTES.Length && matchIdx == -1; i++)
+            {
+                byte[] tmpBytes = ArrayHelpers.SubArray(inputFileBytes, i, FileCtrl.SHIKIBETSU2_BYTES.Length);
+                if (FileCtrl.SHIKIBETSU2_BYTES.SequenceEqual(tmpBytes) == true)
+                {
+                    matchIdx = i;
+                }
+            }
+
             return matchIdx;
         }
 

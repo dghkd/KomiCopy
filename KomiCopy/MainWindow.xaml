@@ -64,10 +64,30 @@
                             <RowDefinition Height="22"/>
                         </Grid.RowDefinitions>
 
-                        <CheckBox x:Name="CB_IsEncrypt"
-                                      Content="使用專屬加密"
-                                      Margin="0,10,0,3">
-                        </CheckBox>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,0,3">
+
+                            <CheckBox x:Name="CB_IsEncrypt"
+                                      VerticalAlignment="Bottom"
+                                      Content="使用專屬加密">
+                            </CheckBox>
+
+                            <Button x:Name="BTN_OpenMultiPubKeyEditor"
+                                    Margin="10,3,0,0"
+                                    Width="100"
+                                    Content="輸入多組密文"
+                                    Click="On_BTN_OpenMultiPubKeyEditor_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=CB_IsEncrypt}" Value="False">
+                                                <Setter Property="IsEnabled" Value="False"></Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
 
                         <TextBlock x:Name="TXT_AnotherPubKey"
                                    Margin="5,0,0,0"
@@ -77,11 +97,11 @@
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value=""></Setter>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=CB_IsEncrypt}" Value="False">
-                                            <Setter Property="Text" Value=""></Setter>
-                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding Text, ElementName=TXTBOX_AnotherPubKey}" Value="">
                                             <Setter Property="Text" Value="請輸入對方密文"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=CB_IsEncrypt}" Value="False">
+                                            <Setter Property="Text" Value=""></Setter>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -93,10 +113,10 @@
                                  Background="#C8FFFFFF"
                                  IsEnabled="{Binding IsChecked, ElementName=CB_IsEncrypt}"
                                  TextWrapping="NoWrap"
+                                 MaxWidth="{Binding ActualWidth, ElementName=LB_Files}"
                                  VerticalContentAlignment="Center"
                                  AcceptsReturn="False">
                         </TextBox>
-
                     </Grid>
 
                     <Grid Grid.Row="3">
@@ -176,7 +196,7 @@
                                  AcceptsReturn="False">
                         </TextBox>
                     </StackPanel>
-                    
+
 
                 </Grid>
             </TabItem>
